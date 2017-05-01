@@ -16,22 +16,22 @@ myRelay::myRelay(String sName){
 // setState
 //-------------------------------
 void   myRelay::setState(int iSstate){
-  
+
 
 	  pinMode(_iRelayPin, OUTPUT);
-	  
-	  String sTopic = String(MQTT_BASE_TOPIC + String("switchAck/ack") + _sRelayName ); 
-  
+
+	  String sTopic = String(MQTT_BASE_TOPIC + String("switchAck/ack") + _sRelayName );
+
   switch (iSstate){
 
       case RELAY_ON:
 	    client.publish(sTopic.c_str(), "on");
-		digitalWrite(_iRelayPin,HIGH);
+		  digitalWrite(_iRelayPin,LOW);
 		break;
-	  
+
 	  case RELAY_OFF:
 	    client.publish(sTopic.c_str(), "off");
-		digitalWrite(_iRelayPin,LOW);
+		digitalWrite(_iRelayPin,HIGH);
 		break;
   }
   return;
@@ -42,14 +42,14 @@ void   myRelay::setState(int iSstate){
 //-------------------------------
 int    myRelay::getState(){
 
-	pinMode(_iRelayPin, INPUT);	
-	return digitalRead(_iRelayPin);     
-  
-  }  
+	pinMode(_iRelayPin, INPUT);
+	return digitalRead(_iRelayPin);
+
+  }
 
 //-------------------------------
 // setPin
-//-------------------------------  
+//-------------------------------
 void   myRelay::setPin(int iPin){
 	_iRelayPin = iPin;
 	return;
@@ -67,7 +67,5 @@ int    myRelay::getPin(){
 //-------------------------------
 
 String myRelay::getName(){
-	return _sRelayName;	
+	return _sRelayName;
 }
-
-
