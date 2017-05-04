@@ -17,7 +17,7 @@ myEEPROM::myEEPROM(){
 //-------------------------------
 bool   myEEPROM::getEEPROMVarsSet(){
   return _iEEPROMVarsSet;
-  }  
+  }
 
 
 //-------------------------------
@@ -25,7 +25,7 @@ bool   myEEPROM::getEEPROMVarsSet(){
 //-------------------------------
 void   myEEPROM::setSSID(String sSSID){
   strcpy(_wifiFromEEPROM.cSSid,sSSID.c_str());}
-  
+
 String myEEPROM::getSSID(){
   return String(_wifiFromEEPROM.cSSid);}
 
@@ -34,7 +34,7 @@ String myEEPROM::getSSID(){
 //-------------------------------
 void   myEEPROM::setPassword(String sPassword){
   strcpy(_wifiFromEEPROM.cPassword,sPassword.c_str());}
-  
+
 String myEEPROM::getPassword(){
   return String(_wifiFromEEPROM.cPassword);}
 
@@ -43,7 +43,7 @@ String myEEPROM::getPassword(){
 //-------------------------------
 void   myEEPROM::setServer(String sServer){
   strcpy(_mqttFromEEPROM.cServer,sServer.c_str());}
-  
+
 String myEEPROM::getServer(){
   return String(_mqttFromEEPROM.cServer);}
 
@@ -52,7 +52,7 @@ String myEEPROM::getServer(){
 //-------------------------------
 void   myEEPROM::setPort(int iPort){
   _mqttFromEEPROM.iPort = iPort;}
-  
+
 int  myEEPROM::getPort(){
   return _mqttFromEEPROM.iPort;}
 
@@ -61,7 +61,7 @@ int  myEEPROM::getPort(){
 //-------------------------------
 void   myEEPROM::setTopic(String sTopic){
   strcpy(_mqttFromEEPROM.cTopic,sTopic.c_str());}
-  
+
 String myEEPROM::getTopic(){
   return String(_mqttFromEEPROM.cTopic);}
 
@@ -70,7 +70,7 @@ String myEEPROM::getTopic(){
 //-------------------------------
 void   myEEPROM::setMaxWifiAttempts(int iMaxWifiAttempts){
   _controlFromEEPROM.iMaxWifiAttempts = iMaxWifiAttempts;}
-  
+
 int  myEEPROM::getMaxWifiAttempts(){
   return _controlFromEEPROM.iMaxWifiAttempts;}
 
@@ -79,7 +79,7 @@ int  myEEPROM::getMaxWifiAttempts(){
 //-------------------------------
 void   myEEPROM::setMaxMqttAttempts(int iMaxMqttAttempts){
   _controlFromEEPROM.iMaxMqttAttempts = iMaxMqttAttempts;}
-  
+
 int  myEEPROM::getMaxMqttAttempts(){
   return _controlFromEEPROM.iMaxMqttAttempts;}
 
@@ -88,7 +88,7 @@ int  myEEPROM::getMaxMqttAttempts(){
 //-------------------------------
 void   myEEPROM::setDebug(bool bDebug){
   _controlFromEEPROM.bDebug = bDebug;}
-  
+
 bool  myEEPROM::getDebug(){
   return _controlFromEEPROM.bDebug;}
 
@@ -111,7 +111,7 @@ void    myEEPROM::setThermoSampleTime(int iThermoSampleTime){
 
 int     myEEPROM::getThermoSampleTime(){
   return _controlFromEEPROM.iThermoSampleTime;}
-  
+
 //--------------------------------------------------
 // spaTemp - temp settnig for spa
 //--------------------------------------------------
@@ -129,7 +129,17 @@ void   myEEPROM::setThermPollTime(int iThermPollTime){
   _controlFromEEPROM.iThermPollTime = iThermPollTime;}
 
 int   myEEPROM::getThermPollTime(){
-  return _controlFromEEPROM.iThermPollTime;}        
+  return _controlFromEEPROM.iThermPollTime;}
+
+//--------------------------------------------------
+// Thermometer polling interval
+//--------------------------------------------------
+void   myEEPROM::setOnButton(bool bOn){
+  _controlFromEEPROM.bOn = bOn;}
+
+bool   myEEPROM::getOnButton(){
+  return _controlFromEEPROM.bOn;}
+
 
 //-------------------------------
 // burn EEPROM
@@ -137,29 +147,29 @@ int   myEEPROM::getThermPollTime(){
 void myEEPROM::burn()
 {
   //setup Memmap
-  
+
   _memMapFromEEPROM.iAddrMemMap  = 1; //position zero is used for data present flag
   _memMapFromEEPROM.iLenMemMap   = sizeof(_memMapFromEEPROM);
-  
+
   _memMapFromEEPROM.iAddrWifi    = _memMapFromEEPROM.iAddrMemMap + _memMapFromEEPROM.iLenMemMap;
   _memMapFromEEPROM.iLenWifi     = sizeof(_wifiFromEEPROM);
-  
+
   _memMapFromEEPROM.iAddrMQTT    = _memMapFromEEPROM.iAddrWifi + _memMapFromEEPROM.iLenWifi;
   _memMapFromEEPROM.iLenMqtt     = sizeof(_mqttFromEEPROM);
 
   _memMapFromEEPROM.iAddrControl = _memMapFromEEPROM.iAddrMQTT + _memMapFromEEPROM.iLenMqtt;
   _memMapFromEEPROM.iLenControl  = sizeof(_controlFromEEPROM);
-  
+
   debug("  EEPROM BEFORE WRITE");
 
-  EEPROM.begin(512);  
+  EEPROM.begin(512);
 
   EEPROM.put(0                              , true);
   EEPROM.put(1                              , _memMapFromEEPROM);
   EEPROM.put(_memMapFromEEPROM.iAddrWifi    , _wifiFromEEPROM);
   EEPROM.put(_memMapFromEEPROM.iAddrMQTT    , _mqttFromEEPROM);
   EEPROM.put(_memMapFromEEPROM.iAddrControl , _controlFromEEPROM);
-  EEPROM.end();     
+  EEPROM.end();
 }
 
 //-------------------------------
@@ -167,13 +177,13 @@ void myEEPROM::burn()
 //-------------------------------
 void myEEPROM::fetch()
 {
-  EEPROM.begin(512);  
+  EEPROM.begin(512);
   EEPROM.get(0                              , _iEEPROMVarsSet);
   EEPROM.get(1                              , _memMapFromEEPROM);
   EEPROM.get(_memMapFromEEPROM.iAddrWifi    , _wifiFromEEPROM);
   EEPROM.get(_memMapFromEEPROM.iAddrMQTT    , _mqttFromEEPROM);
   EEPROM.get(_memMapFromEEPROM.iAddrControl , _controlFromEEPROM);
-  EEPROM.end();  
+  EEPROM.end();
 
   debug("  EEPROM AFTER READ");
 }
@@ -185,11 +195,11 @@ void myEEPROM::fetch()
 //-------------------------------
 void myEEPROM::debug(String sTitle)
 {
-   logger_println("==============================");  
-   logger_println(sTitle);  
-   logger_println("==============================");  
+   logger_println("==============================");
+   logger_println(sTitle);
+   logger_println("==============================");
    logger_print  (String ("== _iEEPROMVarsSet   - ")) ;
-   logger_println(String(_iEEPROMVarsSet) );   
+   logger_println(String(_iEEPROMVarsSet) );
    logger_print  (String ("== cSSid             - ")) ;
    logger_println(String(_wifiFromEEPROM.cSSid) );
    logger_print  (String ("== cPassword         - ")) ;
@@ -207,7 +217,7 @@ void myEEPROM::debug(String sTitle)
    logger_print  (String ("== bDebug            - ")) ;
    logger_println(String(_controlFromEEPROM.bDebug) );
    logger_print  (String ("== iThermoIdleTime   - ")) ;
-   logger_println(String(_controlFromEEPROM.iThermoIdleTime) );   
+   logger_println(String(_controlFromEEPROM.iThermoIdleTime) );
    logger_print  (String ("== iThermoSampleTime - ")) ;
    logger_println(String(_controlFromEEPROM.iThermoSampleTime) );
    logger_print  (String ("== iSpaTemp          - ")) ;
@@ -218,4 +228,3 @@ void myEEPROM::debug(String sTitle)
 
    return;
 }
-

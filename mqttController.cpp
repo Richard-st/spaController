@@ -21,14 +21,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 
 
-  sBaseTopic = MQTT_BASE_TOPIC; 
+  sBaseTopic = MQTT_BASE_TOPIC;
 
 
-  logger_print("**MQTT CALLBACK  **");    
-  logger_print("  Topic = ");  
-  logger_print(sTopic);    
-  logger_print("  Payload = ");  
-  logger_println(sPayload);    
+  logger_print("**MQTT CALLBACK  **");
+  logger_print("  Topic = ");
+  logger_print(sTopic);
+  logger_print("  Payload = ");
+  logger_println(sPayload);
 
   if ((sTopic.indexOf(MQTT_SWITCH_SET) > -1) && bRelaySwitches)  {
     callback_relays(sTopic, sBaseTopic, sPayload );
@@ -48,7 +48,7 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
 
   StaticJsonBuffer<500> jsonBuffer;
   JsonObject& JsonRoot = jsonBuffer.createObject();
-  
+
   String sJson;
 
 
@@ -56,30 +56,43 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
   // Relay Shutdown Request
   //----------------------------------------------//
 
-  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_TURN_OFF) ) > -1){
-    logger_println("  Shut Down"); 
-    client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_BUBBLES).c_str(), "off");
-    client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_LIGHTS).c_str(), "off");
-    client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_PUMP).c_str(), "off");
-    
-    bRelaySwitches = false;
+  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_ON_OFF) ) > -1) {
+    if ( sPayload.equals("off") ){
+      logger_println("  Shut Down");
+      client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ON_OFF).c_str(), "off");
+      client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_BUBBLES).c_str(), "off");
+      //client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_LIGHTS).c_str(), "off");
+      client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_PUMP).c_str(), "off");
+
+      _myEEPROM.setOnButton(false);
+      client.publish(String(sBaseTopic + MQTT_CONTROLLER_REQ + MQTT_GET_STATUS).c_str(),"" );
+      _myEEPROM.burn();
+
+      bRelaySwitches = false;
+    }
+    else{
+
+     //----------------------------------------------//
+     // Relay Startup Request
+     //----------------------------------------------//
+
+      logger_println("  Start Up");
+
+      client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ON_OFF).c_str(), "on");
+      _myEEPROM.setOnButton(true);
+      client.publish(String(sBaseTopic + MQTT_CONTROLLER_REQ + MQTT_GET_STATUS).c_str(),"" );
+      _myEEPROM.burn();
+
+      bRelaySwitches = true;
+    }
   }
 
-  //----------------------------------------------//
-  // Relay Startup Request
-  //----------------------------------------------//
 
-  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_TURN_ON) ) > -1){
-    logger_println("  Start Up"); 
-    bRelaySwitches = true;
-  }
-
-  
   //----------------------------------------------//
   // getControllerStatus
   //----------------------------------------------//
 
-  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_GET_STATUS) ) > -1){  
+  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_GET_STATUS) ) > -1){
    JsonRoot["cSSid"]              = _myEEPROM.getSSID();
    JsonRoot["cPassword"]          = _myEEPROM.getPassword();
    JsonRoot["cServer"]            = _myEEPROM.getServer();
@@ -92,6 +105,7 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
    JsonRoot["iThermoSampleTime"]  = _myEEPROM.getThermoSampleTime();
    JsonRoot["iSpaTemp"]           = _myEEPROM.getSpaTemp();
    JsonRoot["iThermPollTime"]     = _myEEPROM.getThermPollTime();
+   JsonRoot["bOn"]                = _myEEPROM.getOnButton();
 
    JsonRoot.printTo(sJson);
 
@@ -104,7 +118,7 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
   // setSpaIdleTime
   //----------------------------------------------//
 
-  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_THERMO_IDLE_TIME ) ) > -1){  
+  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_THERMO_IDLE_TIME ) ) > -1){
     _myEEPROM.setThermoIdleTime(sPayload.toInt());
     client.publish(String(sBaseTopic + MQTT_CONTROLLER_REQ + MQTT_GET_STATUS).c_str(),"" );
     _myEEPROM.burn();
@@ -115,7 +129,7 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
   // setSpaSampleTime
   //----------------------------------------------//
 
-  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_THERMO_SAMPLE_TIME ) ) > -1){  
+  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_THERMO_SAMPLE_TIME ) ) > -1){
     _myEEPROM.setThermoSampleTime(sPayload.toInt());
     client.publish(String(sBaseTopic + MQTT_CONTROLLER_REQ + MQTT_GET_STATUS).c_str(),"" );
     _myEEPROM.burn();
@@ -125,7 +139,7 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
   // setSpaTemp
   //----------------------------------------------//
 
-  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_SPA_TEMP ) ) > -1){  
+  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_SPA_TEMP ) ) > -1){
     _myEEPROM.setSpaTemp(sPayload.toInt());
     client.publish(String(sBaseTopic + MQTT_CONTROLLER_REQ + MQTT_GET_STATUS).c_str(),"" );
     _myEEPROM.burn();
@@ -135,7 +149,7 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
   // set iThermPollTime
   //----------------------------------------------//
 
-  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_THERM_POLL_TIME ) ) > -1){  
+  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_THERM_POLL_TIME ) ) > -1){
     _myEEPROM.setThermPollTime(sPayload.toInt());
     client.publish(String(sBaseTopic + MQTT_CONTROLLER_REQ + MQTT_GET_STATUS).c_str(),"" );
     _myEEPROM.burn();
@@ -145,7 +159,7 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
   // set thermostat state (non EEPROM)
   //----------------------------------------------//
 
-  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_THERMO_STATE ) ) > -1){  
+  if ( sTopic.indexOf( String(MQTT_CONTROLLER_REQ) + String(MQTT_SET_THERMO_STATE ) ) > -1){
     mySpaThermostat.setState(sPayload.toInt());
     client.publish(String(sBaseTopic + MQTT_CONTROLLER_REQ + MQTT_GET_STATUS).c_str(),"" );
   }
@@ -162,10 +176,10 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
 //-------------------------------------------
 void callback_relays(String sTopic, String sBaseTopic, String sPayload  ){
 
-  logger_print("**CALLBACK RELAYS** "); 
-  
-  if ( sTopic.indexOf( String(MQTT_SWITCH_SET)+ String(MQTT_SET_SPA_BUBBLES) ) > -1){  
-    logger_println(spaBubblesRelay.getName());  
+  logger_print("**CALLBACK RELAYS** ");
+
+  if ( sTopic.indexOf( String(MQTT_SWITCH_SET)+ String(MQTT_SET_SPA_BUBBLES) ) > -1){
+    logger_println(spaBubblesRelay.getName());
 
     if (sPayload.equals("on"))
        spaBubblesRelay.setState(HIGH);
@@ -175,9 +189,9 @@ void callback_relays(String sTopic, String sBaseTopic, String sPayload  ){
 
     return;
   }
-  
-  if ( sTopic.indexOf( String(MQTT_SWITCH_SET)+ String(MQTT_SET_SPA_PUMP) ) > -1){  
-    logger_println(spaPumpRelay.getName());  
+
+  if ( sTopic.indexOf( String(MQTT_SWITCH_SET)+ String(MQTT_SET_SPA_PUMP) ) > -1){
+    logger_println(spaPumpRelay.getName());
 
     if (sPayload.equals("on")){
        spaPumpRelay.setState(HIGH);
@@ -189,10 +203,10 @@ void callback_relays(String sTopic, String sBaseTopic, String sPayload  ){
 
     return;
   }
-  
-  if ( sTopic.indexOf( String(MQTT_SWITCH_SET)+ String(MQTT_SET_SPA_LIGHTS) ) > -1){  
-    logger_println(spaLightsRelay.getName());  
-    
+
+  if ( sTopic.indexOf( String(MQTT_SWITCH_SET)+ String(MQTT_SET_SPA_LIGHTS) ) > -1){
+    logger_println(spaLightsRelay.getName());
+
     if (sPayload.equals("on"))
        spaLightsRelay.setState(HIGH);
 
@@ -201,7 +215,7 @@ void callback_relays(String sTopic, String sBaseTopic, String sPayload  ){
 
     return;
   }
-  
+
 
   return;
 

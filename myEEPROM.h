@@ -48,6 +48,9 @@ class myEEPROM
     void   setThermPollTime(int iThermPollTime);
     int    getThermPollTime();
 
+    void   setOnButton(bool bOn);
+    bool   getOnButton();
+
     void   burn();
     void   fetch();
 
@@ -56,15 +59,15 @@ class myEEPROM
 
   private:
 
-    bool _iEEPROMVarsSet ;  
-  
+    bool _iEEPROMVarsSet ;
+
     struct structEEPROMMemMap{
       int   iAddrMemMap,iLenMemMap ;
       int   iAddrWifi,iLenWifi ;
-      int   iAddrMQTT,iLenMqtt;  
-      int   iAddrControl,iLenControl;  
+      int   iAddrMQTT,iLenMqtt;
+      int   iAddrControl,iLenControl;
     } _memMapFromEEPROM;
- 
+
     struct structWifi{
       char   cSSid[33];
       char   cPassword[20];
@@ -80,14 +83,13 @@ class myEEPROM
       int    iMaxWifiAttempts;
       int    iMaxMqttAttempts;
       bool   bDebug;
-      int    iThermoIdleTime;   
+      int    iThermoIdleTime;
       int    iThermoSampleTime;
       int    iSpaTemp;
       int    iThermPollTime;
+      bool   bOn;
     } _controlFromEEPROM;
 
 
 };
 #endif
-
-
