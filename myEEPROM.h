@@ -38,15 +38,18 @@ class myEEPROM
 
     void   setThermoIdleTime(int iThermoIdleTime);
     int    getThermoIdleTime();
+    int    getThermoIdleTimeMS();
 
     void   setThermoSampleTime(int iThermoSampleTime);
     int    getThermoSampleTime();
+    int    getThermoSampleTimeMS();
 
     void   setSpaTemp(int iSpaTemp);
     int    getSpaTemp();
 
     void   setThermPollTime(int iThermPollTime);
     int    getThermPollTime();
+    int    getThermPollTimeMS();
 
     void   setOnButton(bool bOn);
     bool   getOnButton();

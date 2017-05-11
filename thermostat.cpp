@@ -15,74 +15,73 @@ myThermostat::myThermostat(){
 }
 
 void  myThermostat::setState(int iState){
-   _iState = iState; 
+   _iState = iState;
    return;
 }
 
 int  myThermostat::getState(){
-  return  _iState; 
+  return  _iState;
 }
 
 void  myThermostat::loop(){
 
-  long now = millis();   
+  long now = millis();
 
   //sanity checks on values
-  if (_myEEPROM.getThermoIdleTime()< 100)
+  if (_myEEPROM.getThermoIdleTimeMS()< 100)
       _myEEPROM.setThermoIdleTime(36000);
-      
-  if (_myEEPROM.getThermoSampleTime()< 100)
+
+  if (_myEEPROM.getThermoSampleTimeMS()< 100)
       _myEEPROM.setThermoSampleTime(12000);
 
 
   switch (_iState){
-    
+
     case THEM_STATE_OFF:
        break;
 
     case THEM_STATE_IDLE:
-                
-       if (now - _iLastTime > _myEEPROM.getThermoIdleTime()  ) {
-           _iLastTime = now;   
+
+       if (now - _iLastTime > _myEEPROM.getThermoIdleTimeMS()  ) {
+           _iLastTime = now;
            _iState = THEM_STATE_SAMPLE;
-           String sTopic = String(MQTT_BASE_TOPIC + String(MQTT_SWITCH_SET) + String(MQTT_SET_SPA_PUMP) );   
-           client.publish(sTopic.c_str(), "on");       
+           String sTopic = String(MQTT_BASE_TOPIC + String(MQTT_SWITCH_SET) + String(MQTT_SET_SPA_PUMP) );
+           client.publish(sTopic.c_str(), "on");
        }
        break;
 
     case THEM_STATE_SAMPLE:
 
-       if (now - _iLastTime > _myEEPROM.getThermoSampleTime()  ) {
+       if (now - _iLastTime > _myEEPROM.getThermoSampleTimeMS()  ) {
 
            if ( _myEEPROM.getSpaTemp() >  mySpaThermometer.getTemp() ){ //heat up
-             _iLastTime = now;   
+             _iLastTime = now;
              _iState = THEM_STATE_HEATING;
            }
            else{                                                       // go back to idle
-             _iLastTime = now;   
+             _iLastTime = now;
              _iState = THEM_STATE_IDLE;
-             String sTopic = String(MQTT_BASE_TOPIC + String(MQTT_SWITCH_SET) + String(MQTT_SET_SPA_PUMP) );   
-             client.publish(sTopic.c_str(), "off");       
+             String sTopic = String(MQTT_BASE_TOPIC + String(MQTT_SWITCH_SET) + String(MQTT_SET_SPA_PUMP) );
+             client.publish(sTopic.c_str(), "off");
            }
        }
        break;
 
     case THEM_STATE_HEATING:
-       if ( _myEEPROM.getSpaTemp() <=  mySpaThermometer.getTemp() ){ 
-          _iLastTime = now;   
+       if ( _myEEPROM.getSpaTemp() <=  mySpaThermometer.getTemp() ){
+          _iLastTime = now;
           _iState = THEM_STATE_IDLE;
-          String sTopic = String(MQTT_BASE_TOPIC + String(MQTT_SWITCH_SET) + String(MQTT_SET_SPA_PUMP) );   
-          client.publish(sTopic.c_str(), "off");       
+          String sTopic = String(MQTT_BASE_TOPIC + String(MQTT_SWITCH_SET) + String(MQTT_SET_SPA_PUMP) );
+          client.publish(sTopic.c_str(), "off");
        }
-    
+
 
     default:
-       _iLastTime = now;   
+       _iLastTime = now;
        _iState = THEM_STATE_IDLE;
        break;
-    
-    
+
+
   }
   return;
 }
-

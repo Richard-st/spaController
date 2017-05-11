@@ -8,7 +8,7 @@
 #include <DallasTemperature.h>
 
    OneWire           *oneWire;
-   DallasTemperature *DS18B20;  
+   DallasTemperature *DS18B20;
 
 //-------------------------------
 // constructor
@@ -18,7 +18,7 @@ myThermometer::myThermometer(String sName, int iBus){
   _sThermometerName = sName;
 
   oneWire = new OneWire(iBus);
-  DS18B20 = new DallasTemperature(oneWire); 
+  DS18B20 = new DallasTemperature(oneWire);
 
 }
 
@@ -56,40 +56,40 @@ float  myThermometer::getTemp(){
 }
 //-------------------------------
 // getTempAndPost
-//-------------------------------	
+//-------------------------------
 float  myThermometer::getTempAndPost(){
-	
+
  	 readThermometer();
-	 
-	 String sTopic = String(MQTT_BASE_TOPIC + String(MQTT_TEMP_SENSOR) + _sThermometerName ); 	
+
+	 String sTopic = String(MQTT_BASE_TOPIC + String(MQTT_TEMP_SENSOR) + _sThermometerName );
 
 	 String sTemp(_fTemp,3);
-	 
+
      client.publish(sTopic.c_str(), sTemp.c_str());
 
-	  
+
 	 return _fTemp;
 }
 
 //---------------------------------------------------
 // loop - posts the temprature after setPollTimeMS
 //
-//----------------------------------------------------	
+//----------------------------------------------------
 void myThermometer::loop(){
-	
-    long now = millis(); 
+
+    long now = millis();
 
     //sanity checks on values
-    if (_myEEPROM.getThermPollTime()< 100)
+    if (_myEEPROM.getThermPollTimeMS()< 100)
         _myEEPROM.setThermPollTime(2000);
 
-   
-    if (now - _iLastPost > _myEEPROM.getThermPollTime()  ) {
+
+    if (now - _iLastPost > _myEEPROM.getThermPollTimeMS()  ) {
       _iLastPost = now;
-      this->getTempAndPost();   
+      this->getTempAndPost();
       delay (2); //stop double message posting
-    }	
-	
+    }
+
 	return ;
 }
 
@@ -100,12 +100,9 @@ void myThermometer::readThermometer(){
 
 
  do {
-      DS18B20->requestTemperatures(); 
+      DS18B20->requestTemperatures();
       _fTemp = DS18B20->getTempCByIndex(0);
     } while (_fTemp == 85.0 || _fTemp == (-127.0));
-	
-	
+
+
 }
-
-
-

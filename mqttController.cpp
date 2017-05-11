@@ -62,7 +62,7 @@ void callback_controller(String sTopic, String sBaseTopic, String sPayload  ){
       client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ON_OFF).c_str(), "off");
       client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_PUMP).c_str(), "off");
       client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_BUBBLES).c_str(), "off");
-      client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_LIGHTS).c_str(), "off");
+      //client.publish(String(sBaseTopic +  MQTT_SWITCH_ACK + MQTT_ACK_SPA_LIGHTS).c_str(), "off");
 
       _myEEPROM.setOnButton(false);
       client.publish(String(sBaseTopic + MQTT_CONTROLLER_REQ + MQTT_GET_STATUS).c_str(),"" );

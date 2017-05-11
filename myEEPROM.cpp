@@ -102,6 +102,9 @@ void    myEEPROM::setThermoIdleTime(int iThermoIdleTime){
 int     myEEPROM::getThermoIdleTime(){
   return _controlFromEEPROM.iThermoIdleTime;}
 
+  int     myEEPROM::getThermoIdleTimeMS(){
+    return _controlFromEEPROM.iThermoIdleTime*1000;}
+
 //--------------------------------------------------
 // SpaWaitTime - second to wait before turning pump on for temp check
 //--------------------------------------------------
@@ -111,6 +114,9 @@ void    myEEPROM::setThermoSampleTime(int iThermoSampleTime){
 
 int     myEEPROM::getThermoSampleTime(){
   return _controlFromEEPROM.iThermoSampleTime;}
+
+  int     myEEPROM::getThermoSampleTimeMS(){
+    return _controlFromEEPROM.iThermoSampleTime*1000;}
 
 //--------------------------------------------------
 // spaTemp - temp settnig for spa
@@ -131,8 +137,11 @@ void   myEEPROM::setThermPollTime(int iThermPollTime){
 int   myEEPROM::getThermPollTime(){
   return _controlFromEEPROM.iThermPollTime;}
 
+  int   myEEPROM::getThermPollTimeMS(){
+    return _controlFromEEPROM.iThermPollTime*1000;}
+
 //--------------------------------------------------
-// Thermometer polling interval
+// On OFF switch
 //--------------------------------------------------
 void   myEEPROM::setOnButton(bool bOn){
   _controlFromEEPROM.bOn = bOn;}
